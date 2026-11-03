@@ -64,6 +64,16 @@ class APIHandler(BaseHTTPRequestHandler):
             return self.send_json(200, {
                 "messages": messages, "total": len(messages)
             })
+        if self.path.startswith("/messages/"):
+            raw_id = self.path[len("/messages/"):]
+            try:
+                index = int(raw_id)
+            except ValueError:
+                return self.send_json(400, {"error": "id must be an integer"})
+            messages = read_messages()
+            if index < 0 or index >= len(messages):
+                return self.send_json(404, {"error": "Message not found"})
+            return self.send_json(200, {"id": index, "message": messages[index]})
         return self.send_json(404, {"error": "Endpoint not found"})
 
     def do_POST(self):
